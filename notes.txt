@@ -1,0 +1,17 @@
+WHatss ??
+
+unistd - Unix Standard - we're using Close() function to close Client Socket.
+
+arpa/inet - Address Resolution Protocol (ARP) / Internet Protocol (IP) Network - used for structures and functions
+        -struct in_addr
+        -struct sockaddr_in
+        -inet_addr()
+        -inet_ntoa() : used to convert the binary IP address back to a string for display purposes.
+        -inet_pton() and inet_ntop()
+
+
+Server - 
+Socket()
+Bind()
+Listen()
+Accept()

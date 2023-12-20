@@ -5,12 +5,19 @@
 #include <arpa/inet.h>
 
 #define PORT 8080
-#define MAX_CONNECTIONS 10
+#define MAX_CONNECTIONS 2
+
+void handle_request(int client_socket) {
+    sleep(2);
+    const char *response = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello, World!\n";
+    write(client_socket, response, strlen(response));
+}
 
 int main() {
     int server_socket, client_socket;
     struct sockaddr_in server_address, client_address;
     socklen_t address_size = sizeof(server_address);
+    char buffer[256];
 
     // Create socket
     if ((server_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -48,9 +55,13 @@ int main() {
         // Handle the connection (this is where you'll implement the logic for handling HTTP requests)
         // For now, let's just print a message indicating the connection
         printf("Connection accepted from %s:%d\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
-
+        read(client_socket, buffer, sizeof(buffer));
+        printf("%s", buffer);
+        handle_request(client_socket);
+        // write(client_socket, "Hello", strlen("Hello"));
+        printf("\n %d", client_socket);
         // Close the client socket (in a real server, you would handle the connection here)
-        close(client_socket);
+        // close(client_socket);
     }
 
     // Close the server socket (this part will not be reached in this basic example)
