@@ -7,10 +7,57 @@
 #define PORT 8080
 #define MAX_CONNECTIONS 2
 
-void handle_request(int client_socket) {
-    sleep(2);
+char *get_first_substring(const char *input) {
+    // Find the length of the substring until the first space
+    size_t substring_length = 0;
+    while (input[substring_length] != '\0' && input[substring_length] != ' ') {
+        ++substring_length;
+    }
+
+    // Allocate memory for the substring
+    char *substring = (char *)malloc(substring_length + 1);
+    if (substring == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Copy the substring
+    strncpy(substring, input, substring_length);
+    substring[substring_length] = '\0';  // Null-terminate the substring
+
+    return substring;
+}
+
+
+
+void handle_request(int client_socket, char *buffer) {
+    // sleep(2);
+    char *method = get_first_substring(buffer);
     const char *response = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello, World!\n";
-    write(client_socket, response, strlen(response));
+
+
+    if(strcmp("GET", method) == 0){
+        response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! from GET request\n";
+        write(client_socket, response, strlen(response));
+    }
+    else if(strcmp("PUT", method) == 0){
+        response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! from PUT request\n";
+        write(client_socket, response, strlen(response));
+    }
+    else if(strcmp("POST", method) == 0){
+        response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! from POST request\n";
+        write(client_socket, response, strlen(response));
+    }
+    else if(strcmp("DELETE", method) == 0){
+        response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! from DELETE request\n";
+        write(client_socket, response, strlen(response));
+    }
+    else{
+        response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! Not a GET/POST/PUT/DELETE request\n";
+        write(client_socket, response, strlen(response));
+    }
+
+
 }
 
 int main() {
@@ -57,9 +104,9 @@ int main() {
         printf("Connection accepted from %s:%d\n", inet_ntoa(client_address.sin_addr), ntohs(client_address.sin_port));
         read(client_socket, buffer, sizeof(buffer));
         printf("%s", buffer);
-        handle_request(client_socket);
+        handle_request(client_socket, buffer);
         // write(client_socket, "Hello", strlen("Hello"));
-        printf("\n %d", client_socket);
+        printf("\n %d \n", client_socket);
         // Close the client socket (in a real server, you would handle the connection here)
         // close(client_socket);
     }
