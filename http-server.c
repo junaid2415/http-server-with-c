@@ -7,22 +7,38 @@
 #define PORT 8080
 #define MAX_CONNECTIONS 2
 
-char *get_first_substring(const char *input) {
-    // Find the length of the substring until the first space
-    size_t substring_length = 0;
-    while (input[substring_length] != '\0' && input[substring_length] != ' ') {
-        ++substring_length;
+char *get_nth_substring(const char *input, int n) {
+    // Find the start and end positions of the nth substring
+    int substring_start = 0;
+    int substring_end = 0;
+    int substring_count = 0;
+
+    while (input[substring_end] != '\0') {
+        if (input[substring_end] == ' ') {
+            ++substring_count;
+            if (substring_count == n) {
+                break;  // Found the end of the nth substring
+            }
+            substring_start = substring_end + 1;  // Move to the start of the next substring
+        }
+        ++substring_end;
     }
 
-    // Allocate memory for the substring
+    // If n is greater than the number of substrings, or if n is 0, return NULL
+    if (substring_count < n || n == 0) {
+        return NULL;
+    }
+
+    // Allocate memory for the nth substring
+    int substring_length = substring_end - substring_start;
     char *substring = (char *)malloc(substring_length + 1);
     if (substring == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         exit(EXIT_FAILURE);
     }
 
-    // Copy the substring
-    strncpy(substring, input, substring_length);
+    // Copy the nth substring
+    strncpy(substring, input + substring_start, substring_length);
     substring[substring_length] = '\0';  // Null-terminate the substring
 
     return substring;
@@ -32,30 +48,41 @@ char *get_first_substring(const char *input) {
 
 void handle_request(int client_socket, char *buffer) {
     // sleep(2);
-    char *method = get_first_substring(buffer);
+    char *method = get_nth_substring(buffer, 1);
+    char *protocol = get_nth_substring(buffer,3);
     const char *response = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\n\r\nHello, World!\n";
 
-
-    if(strcmp("GET", method) == 0){
-        response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! from GET request\n";
+    if(strcmp(protocol, "HTTP/1.1") != 0) {
+        response = "Not a valid HTTP request";
         write(client_socket, response, strlen(response));
-    }
-    else if(strcmp("PUT", method) == 0){
-        response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! from PUT request\n";
-        write(client_socket, response, strlen(response));
-    }
-    else if(strcmp("POST", method) == 0){
-        response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! from POST request\n";
-        write(client_socket, response, strlen(response));
-    }
-    else if(strcmp("DELETE", method) == 0){
-        response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! from DELETE request\n";
-        write(client_socket, response, strlen(response));
+        return ;
     }
     else{
-        response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! Not a GET/POST/PUT/DELETE request\n";
-        write(client_socket, response, strlen(response));
+
+        if(strcmp("GET", method) == 0){
+            response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! from GET request\n";
+            write(client_socket, response, strlen(response));
+        }
+        else if(strcmp("PUT", method) == 0){
+            response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! from PUT request\n";
+            write(client_socket, response, strlen(response));
+        }
+        else if(strcmp("POST", method) == 0){
+            response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! from POST request\n";
+            write(client_socket, response, strlen(response));
+        }
+        else if(strcmp("DELETE", method) == 0){
+            response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! from DELETE request\n";
+            write(client_socket, response, strlen(response));
+        }
+        else{
+            response = "HTTP/1.1 200 OK\r\nContent-Length: 50\r\n\r\nHello, World! Not a GET/POST/PUT/DELETE request\n";
+            write(client_socket, response, strlen(response));
+        }
+
     }
+
+
 
 
 }
